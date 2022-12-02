@@ -34,8 +34,7 @@ const requestLogger = (request, response, next) => {
 }
 app.use(express.json()) //Notice that json-parser is taken into use before the requestLogger middleware, because otherwise request.body will not be initialized when the logger is executed!
 app.use(requestLogger)
-app.use(morgan('combined'))
-
+app.use(morgan(':method :url :status :response-time[digits] :response-time ms - :body'))
 /* ------------------------------------------------------------------------------------------(app.get('/info')-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 const info = Date()
 /* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -48,24 +47,35 @@ const info = Date()
   
   app.post('/api/persons', (request, response) => {
     const body = request.body
+
+    const exists = persons.find((checkPerson) => {
+      return checkPerson.name === body.name && checkPerson.number === body.number;
+    });
   
-    if (!persons.name || persons.number) {
+    if (exists) {
       return response.status(400).json({ 
-        error: `name or number must be unique`
+        error: `name and number must be unique`
       })
-    }
+    } 
   
     const person = {
       content: body.content,
+      name: body.name,
+      number: body.number,
       important: body.important || false, // To be exact, when the important property is false, then the body.important || false expression will in fact return the false from the right-hand side..
       date: new Date(),
       id: generateId(),
     }
   
     persons = persons.concat(person)
-  
     response.json(person)
   })
+
+  morgan.token('body', req => {
+    return JSON.stringify(req.body)
+  })
+  
+  app.use(morgan(':method :url :status :response-time[digits] :response-time ms - :body'))
   /* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
   app.get('/api/persons', (request, response) => { // The event handler function accepts two parameters. The first request parameter contains all of the information of the HTTP request, and the second response parameter is used to define how the request is responded to.
     response.send(persons)

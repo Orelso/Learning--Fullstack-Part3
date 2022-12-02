@@ -1,16 +1,19 @@
-GET http://localhost:2/api/persons/
+
+GET http://localhost:4000/api/persons
 
 ###
-POST http://localhost:2/api/persons
+POST http://localhost:4000/api/persons
 Content-Type: application/json
 
 {
+    "name": "tim",
+    "number": "894562",
     "content": "New Nogyuhte",
     "important": true
 }
 
 ###
-GET  http://localhost:2/info/
+GET  http://localhost:4000/info/
 
 ###
-DELETE http://localhost:2/api/persons/3
+DELETE http://localhost:4000/api/persons/3
