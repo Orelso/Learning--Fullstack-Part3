@@ -1,0 +1,13 @@
+GET http://localhost:2/api/persons
+
+###
+POST http://localhost:2/api/persons
+Content-Type: application/json
+
+{
+    "content": "New Nogyuhte",
+    "important": true
+}
+
+###
+GET  http://localhost:2/api/info/
