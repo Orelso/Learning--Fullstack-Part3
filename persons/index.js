@@ -1,7 +1,6 @@
 const express = require('express')
+var morgan = require('morgan')
 const app = express()
-app.use(express.json())
-
 /* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 let persons =[
   { 
@@ -25,6 +24,18 @@ let persons =[
     "number": "39-23-6423122"
   }
 ]
+/* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
+app.use(express.json()) //Notice that json-parser is taken into use before the requestLogger middleware, because otherwise request.body will not be initialized when the logger is executed!
+app.use(requestLogger)
+app.use(morgan('combined'))
+
 /* ------------------------------------------------------------------------------------------(app.get('/info')-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 const info = Date()
 /* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -38,9 +49,9 @@ const info = Date()
   app.post('/api/persons', (request, response) => {
     const body = request.body
   
-    if (!body.content) {
+    if (!persons.name || persons.number) {
       return response.status(400).json({ 
-        error: 'content missing' 
+        error: `name or number must be unique`
       })
     }
   
@@ -85,7 +96,13 @@ const info = Date()
   }
   })
 /* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-const PORT = 2
+const unknownEndpoint = (request, response) => { // This means that we are defining middleware functions that are only called if no route handles the HTTP request.
+  response.status(404).send({ error: 'unknown endpoint' }) // is used for catching requests made to non-existent routes
+}
+
+app.use(unknownEndpoint)
+/* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+const PORT = 4000
 app.listen(PORT) //* Binds the http server assigned to the app variable, to listen to HTTP requests sent to the port 3001:
 console.log(`Server running on port ${PORT}`)
 
